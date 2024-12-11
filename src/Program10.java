@@ -21,7 +21,6 @@
 //
 //********************************************************************
 
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Program10 {
@@ -39,7 +38,8 @@ public class Program10 {
     public static void main(String[] args) {
 
         developerInfo();
-        runProgram();
+        Program10 program = new Program10();
+        program.runProgram();
 
     } // End of the main method
 
@@ -61,70 +61,105 @@ public class Program10 {
         System.out.println("Due Date: December 13th\n");
     } // End of the developerInfo method
 
-    public static void runProgram() {
+    public void runProgram()
+    {
         Scanner input = new Scanner(System.in);
 
-        while (true) {
+        while (true)
+        {
             System.out.print("Enter employee's first name (or 'No'/'no' to end): ");
             String firstName = input.nextLine().trim();
 
             if (firstName.equalsIgnoreCase("No"))
                 break;
 
-            System.out.print("Enter employee's last name: ");
-            String lastName = input.nextLine().trim();
+            HourlyEmployee emp = getEmployeeData(firstName, input);
 
-            double payRate = 0.0;
-            boolean validRate = false;
-            while (!validRate) {
-                System.out.print("Enter employee's hourly pay rate: ");
-                try {
-                    payRate = Double.parseDouble(input.nextLine().trim());
-                    validRate = true;
-                } catch (NumberFormatException e) {
-                    System.out.println("Invalid number. Please try again.");
-                }
+            if (emp == null) {
+                // If invalid data was entered, re-try
+                continue;
             }
+            getHours(emp, input);
 
-            System.out.print("Enter employee's SSN (format XXX-XX-XXXX): ");
-            String SSN = input.nextLine().trim();
-
-            HourlyEmployee emp = null;
-            try {
-                emp = new HourlyEmployee(firstName, lastName, SSN, payRate);
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
-                System.out.println("Please re-enter the employee's information.");
-                continue; // go back and ask again
-            }
-
-            // Get hours worked for 4 weeks
-            for (int week = 1; week <= 4; week++) {
-                double hours = 0.0;
-                boolean validHours = false;
-                while (!validHours) {
-                    System.out.print("Enter hours worked for week " + week + ": ");
-                    try {
-                        hours = Double.parseDouble(input.nextLine().trim());
-                        if (hours < 0)
-                            throw new IllegalArgumentException("Hours cannot be negative.");
-                        validHours = true;
-                    } catch (NumberFormatException e) {
-                        System.out.println("Invalid number. Please try again.");
-                    } catch (IllegalArgumentException e) {
-                        System.out.println(e.getMessage());
-                    }
-                }
-
-                emp.setTotalHoursWorked(hours);
-            }
-
-            // Print the results
-            System.out.println();
-            System.out.println(emp.toString());
-
-        } // end while
+            printEmployeeDetails(emp);
+        }
 
         System.out.println("Program ended.");
+    }
+
+    public HourlyEmployee getEmployeeData(String firstName, Scanner input)
+    {
+        System.out.print("Enter employee's last name: ");
+        String lastName = input.nextLine().trim();
+
+        double payRate = 0.0;
+        boolean validRate = false;
+        while (!validRate)
+        {
+            System.out.print("Enter employee's hourly pay rate: ");
+            String payRateStr = input.nextLine().trim();
+            try
+            {
+                payRate = Double.parseDouble(payRateStr);
+                validRate = true;
+            }
+            catch (NumberFormatException e)
+            {
+                System.out.println("Invalid pay rate. Please try again.");
+            }
+        }
+
+        System.out.print("Enter employee's SSN (format XXX-XX-XXXX): ");
+        String SSN = input.nextLine().trim();
+
+        HourlyEmployee emp = null;
+        try
+        {
+            emp = new HourlyEmployee(firstName, lastName, SSN, payRate);
+        }
+        catch (IllegalArgumentException e)
+        {
+            System.out.println(e.getMessage());
+            System.out.println("Please re-enter the employee's information.");
+        }
+
+        return emp;
+    }
+
+    public void getHours(HourlyEmployee emp, Scanner input)
+    {
+        for (int week = 1; week <= 4; week++)
+        {
+            double hours = 0.0;
+            boolean validHours = false;
+            while (!validHours)
+            {
+                System.out.print("Enter hours worked for week " + week + ": ");
+                String hoursStr = input.nextLine().trim();
+                try
+                {
+                    hours = Double.parseDouble(hoursStr);
+                    if (hours < 0)
+                        throw new IllegalArgumentException("Hours cannot be negative.");
+                    validHours = true;
+                }
+                catch (NumberFormatException e)
+                {
+                    System.out.println("Invalid hours. Please enter a valid number.");
+                }
+                catch (IllegalArgumentException e)
+                {
+                    System.out.println(e.getMessage());
+                }
+            }
+
+            emp.setTotalHoursWorked(hours);
+        }
+        System.out.println();
+    }
+
+    public void printEmployeeDetails(HourlyEmployee emp)
+    {
+        System.out.println(emp.toString());
     }
 }
